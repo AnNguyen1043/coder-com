@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment, useContext } from "react";
 import {
   Box,
   Link,
@@ -16,8 +16,24 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PostReaction from "./PostReaction";
 import CommentForm from "../comment/CommentForm";
 import CommentList from "../comment/CommentList";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import PostDelete from "./PostDelete";
+import { AuthContext } from "../../../contexts/AuthContext";
+import PostEdit from "./PostEdit";
 
 function PostCard({ post }) {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const { user } = useContext(AuthContext);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     // <div>{post.content}</div>
     <Card>
@@ -46,9 +62,42 @@ function PostCard({ post }) {
           </Typography>
         }
         action={
-          <IconButton>
-            <MoreVertIcon sx={{ fontSize: 30 }} />
-          </IconButton>
+          <>
+            <IconButton
+              id={`actions-${post._id}`}
+              aria-controls={open ? `actions-${post._id}-menu` : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+              onClick={handleClick}
+            >
+              <MoreVertIcon sx={{ fontSize: 30 }} />
+            </IconButton>
+            {post.author._id === user._id && (
+              <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                MenuListProps={{
+                  "aria-labelledby": "basic-button",
+                }}
+              >
+                {post.author._id === user._id && (
+                  <>
+                    <MenuItem>
+                      <PostDelete
+                        postId={post._id}
+                        onMenuClosed={handleClose}
+                      />
+                    </MenuItem>
+                    <MenuItem>
+                      <PostEdit />
+                    </MenuItem>
+                  </>
+                )}
+              </Menu>
+            )}
+          </>
         }
       />
 

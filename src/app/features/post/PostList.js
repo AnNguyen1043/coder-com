@@ -4,6 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import PostCard from "./PostCard";
 import { getPosts } from "./postSlice";
+import { PostContext } from "./PostContext";
 
 function PostList({ userId }) {
   const [page, setPage] = useState(1);
@@ -19,7 +20,7 @@ function PostList({ userId }) {
   }, [dispatch, userId, page]);
 
   return (
-    <>
+    <PostContext.Provider value={{ page }}>
       {posts.map((post) => (
         <PostCard key={post._id} post={post} />
       ))}
@@ -39,7 +40,7 @@ function PostList({ userId }) {
           <Typography variant="h6">No Post Yet</Typography>
         )}
       </Box>
-    </>
+    </PostContext.Provider>
   );
 }
 

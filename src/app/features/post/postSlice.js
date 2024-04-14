@@ -35,12 +35,8 @@ const slice = createSlice({
     getPostsSuccess(state, action) {
       state.isLoading = false;
       state.error = null;
+
       const { posts, count } = action.payload;
-      // console.log("posts: ", posts);
-      // state.posts = state.posts.concat(posts);
-
-      // state.totalPosts = count;
-
       posts.forEach((post) => {
         state.postsById[post._id] = post;
         if (!state.currentPagePosts.includes(post._id))
@@ -53,12 +49,35 @@ const slice = createSlice({
       state.isLoading = false;
       state.error = null;
       const newPost = action.payload;
-      console.log("new post: ", newPost);
+      // console.log("new post: ", newPost);
 
       if (state.currentPagePosts.length % POSTS_PER_PAGE === 0)
         state.currentPagePosts.pop();
       state.postsById[newPost._id] = newPost;
       state.currentPagePosts.unshift(newPost._id);
+    },
+
+    deletePostSuccess(state, action) {
+      state.isLoading = false;
+      state.error = null;
+      const deletedPost = action.payload;
+
+      const deletedIndex = state.currentPagePosts.findIndex(
+        (item) => item === deletedPost._id
+      );
+
+      const currentPagePosts = state.currentPagePosts;
+
+      if (deletedIndex !== -1) {
+        currentPagePosts.splice(deletedIndex, 1);
+        state.currentPagePosts = currentPagePosts;
+        delete state.postsById[deletedPost._id];
+      }
+
+      // if (state.currentPagePosts.length % POSTS_PER_PAGE === 0)
+      //   state.currentPagePosts.pop();
+      // state.postsById[newPost._id] = newPost;
+      // state.currentPagePosts.unshift(newPost._id);
     },
 
     sendPostReactionSuccess(state, action) {
@@ -129,6 +148,25 @@ export const sendPostReaction =
           reactions: response.data,
         })
       );
+    } catch (error) {
+      dispatch(slice.actions.hasError(error.message));
+      toast.error(error.message);
+    }
+  };
+
+export const deletePost =
+  ({ postId, currentPage, userId }) =>
+  async (dispatch) => {
+    dispatch(slice.actions.startLoading());
+    try {
+      const response = await apiService.delete(`/posts/${postId}`);
+
+      if (response.data.success) {
+        dispatch(slice.actions.deletePostSuccess(response.data.data));
+        toast.success("Delete Post successfully");
+        dispatch(getCurrentUserProfile());
+        dispatch(getPosts({ userId, page: currentPage }));
+      }
     } catch (error) {
       dispatch(slice.actions.hasError(error.message));
       toast.error(error.message);
