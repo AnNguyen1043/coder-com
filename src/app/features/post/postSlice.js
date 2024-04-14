@@ -57,6 +57,14 @@ const slice = createSlice({
       state.currentPagePosts.unshift(newPost._id);
     },
 
+    updatePostSuccess(state, action) {
+      state.isLoading = false;
+      state.error = null;
+      const updatePost = action.payload;
+
+      state.postsById[updatePost._id] = updatePost;
+    },
+
     deletePostSuccess(state, action) {
       state.isLoading = false;
       state.error = null;
@@ -73,11 +81,6 @@ const slice = createSlice({
         state.currentPagePosts = currentPagePosts;
         delete state.postsById[deletedPost._id];
       }
-
-      // if (state.currentPagePosts.length % POSTS_PER_PAGE === 0)
-      //   state.currentPagePosts.pop();
-      // state.postsById[newPost._id] = newPost;
-      // state.currentPagePosts.unshift(newPost._id);
     },
 
     sendPostReactionSuccess(state, action) {
@@ -167,6 +170,26 @@ export const deletePost =
         dispatch(getCurrentUserProfile());
         dispatch(getPosts({ userId, page: currentPage }));
       }
+    } catch (error) {
+      dispatch(slice.actions.hasError(error.message));
+      toast.error(error.message);
+    }
+  };
+
+export const updatePost =
+  ({ postId, content, image }) =>
+  async (dispatch) => {
+    dispatch(slice.actions.startLoading());
+    try {
+      // upload image to cloudinary
+      const imageUrl = await cloudinaryUpload(image);
+      const response = await apiService.put(`/posts/${postId}`, {
+        content,
+        image: imageUrl,
+      });
+      dispatch(slice.actions.updatePostSuccess(response.data.data));
+      toast.success("Edit successfully");
+      dispatch(getCurrentUserProfile());
     } catch (error) {
       dispatch(slice.actions.hasError(error.message));
       toast.error(error.message);

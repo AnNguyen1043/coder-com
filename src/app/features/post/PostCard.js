@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from "react";
+import React, { Fragment, useContext, useState } from "react";
 import {
   Box,
   Link,
@@ -8,6 +8,7 @@ import {
   Typography,
   CardHeader,
   IconButton,
+  Button,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { fDate } from "../../../utils/formatTime";
@@ -20,10 +21,11 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import PostDelete from "./PostDelete";
 import { AuthContext } from "../../../contexts/AuthContext";
-import PostEdit from "./PostEdit";
+import PostForm from "./PostForm";
 
 function PostCard({ post }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [isEditMode, setEditMode] = useState(false);
   const open = Boolean(anchorEl);
   const { user } = useContext(AuthContext);
 
@@ -34,8 +36,33 @@ function PostCard({ post }) {
     setAnchorEl(null);
   };
 
+  const PostView = (
+    <>
+      <Typography>{post.content}</Typography>
+      {post.image && (
+        <Box
+          sx={{
+            borderRadius: 2,
+            overflow: "hidden",
+            height: 300,
+            "& img": { objectFit: "cover", width: 1, height: 1 },
+          }}
+        >
+          <img src={post.image} alt="post" />
+        </Box>
+      )}
+
+      <PostReaction post={post} />
+      <CommentList postId={post._id} />
+      <CommentForm postId={post._id} />
+    </>
+  );
+
+  const handleOnEditSuccess = () => {
+    setEditMode(false);
+  };
+
   return (
-    // <div>{post.content}</div>
     <Card>
       <CardHeader
         disableTypography
@@ -90,8 +117,13 @@ function PostCard({ post }) {
                         onMenuClosed={handleClose}
                       />
                     </MenuItem>
-                    <MenuItem>
-                      <PostEdit />
+                    <MenuItem
+                      onClick={() => {
+                        handleClose();
+                        setEditMode(true);
+                      }}
+                    >
+                      <Typography>Edit</Typography>
                     </MenuItem>
                   </>
                 )}
@@ -102,24 +134,14 @@ function PostCard({ post }) {
       />
 
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Typography>{post.content}</Typography>
-
-        {post.image && (
-          <Box
-            sx={{
-              borderRadius: 2,
-              overflow: "hidden",
-              height: 300,
-              "& img": { objectFit: "cover", width: 1, height: 1 },
-            }}
-          >
-            <img src={post.image} alt="post" />
-          </Box>
+        {isEditMode ? (
+          <>
+            <PostForm post={post} onEditSuccess={handleOnEditSuccess} />
+            <Button onClick={() => setEditMode(false)}>Cancel</Button>
+          </>
+        ) : (
+          PostView
         )}
-
-        <PostReaction post={post} />
-        <CommentList postId={post._id} />
-        <CommentForm postId={post._id} />
       </Stack>
     </Card>
   );

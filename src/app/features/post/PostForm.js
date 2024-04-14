@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Box, Card, alpha, Stack } from "@mui/material";
 
 import {
@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { createPost } from "./postSlice";
+import { createPost, updatePost } from "./postSlice";
 import { LoadingButton } from "@mui/lab";
 
 const yupSchema = Yup.object().shape({
@@ -22,7 +22,7 @@ const defaultValues = {
   image: "",
 };
 
-function PostForm() {
+function PostForm({ post, onEditSuccess }) {
   const { isLoading } = useSelector((state) => state.post);
 
   const methods = useForm({
@@ -36,6 +36,16 @@ function PostForm() {
     formState: { isSubmitting },
   } = methods;
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (post) {
+      // binding post value;
+      reset({
+        content: post.content,
+        image: post.image,
+      });
+    }
+  }, [post]);
 
   const handleDrop = useCallback(
     (acceptedFiles) => {
@@ -54,7 +64,17 @@ function PostForm() {
   );
 
   const onSubmit = (data) => {
-    dispatch(createPost(data)).then(() => reset());
+    if (post) {
+      // Update post
+      dispatch(updatePost({ ...data, postId: post._id })).then(() => {
+        reset(defaultValues);
+        if (typeof onEditSuccess === "function") {
+          onEditSuccess();
+        }
+      });
+    } else {
+      dispatch(createPost(data)).then(() => reset());
+    }
   };
 
   return (
@@ -95,7 +115,7 @@ function PostForm() {
               size="small"
               loading={isSubmitting || isLoading}
             >
-              Post
+              {post ? "Update" : "Post"}
             </LoadingButton>
           </Box>
         </Stack>

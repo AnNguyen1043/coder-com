@@ -102,7 +102,7 @@ export const getCurrentUserProfile = () => async (dispatch) => {
   dispatch(slice.actions.startLoading());
   try {
     const response = await apiService.get("/users/me");
-    dispatch(slice.actions.updateUserProfileSuccess(response.data));
+    dispatch(slice.actions.updateUserProfileSuccess(response.data.data));
   } catch (error) {
     dispatch(slice.actions.hasError(error));
   }
