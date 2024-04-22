@@ -39,13 +39,13 @@ function PostForm({ post, onEditSuccess }) {
 
   useEffect(() => {
     if (post) {
-      // binding post value;
+      // binding post value for editing;
       reset({
         content: post.content,
         image: post.image,
       });
     }
-  }, [post]);
+  }, [post, reset]);
 
   const handleDrop = useCallback(
     (acceptedFiles) => {
