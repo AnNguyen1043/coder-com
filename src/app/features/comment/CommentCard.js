@@ -1,12 +1,5 @@
-import React, { useContext, useState } from "react";
-import {
-  Avatar,
-  Box,
-  Paper,
-  Stack,
-  Typography,
-  IconButton,
-} from "@mui/material";
+import React from "react";
+import { Avatar, Box, Paper, Stack, Typography } from "@mui/material";
 import { fDate } from "../../../utils/formatTime";
 import CommentReaction from "./CommentReaction";
 
@@ -30,11 +23,6 @@ function CommentCard({ comment }) {
             <Typography variant="caption" sx={{ color: "text.disabled" }}>
               {fDate(comment.createdAt)}
             </Typography>
-            {/* {isYourself && (
-              <IconButton onClick={handleClick}>
-                <DeleteIcon sx={{ fontSize: 30 }} />
-              </IconButton>
-            )} */}
             <CommentDelete comment={comment} />
           </div>
         </Stack>

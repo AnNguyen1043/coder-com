@@ -1,4 +1,4 @@
-import { Box, Button, Input, Modal, Typography } from "@mui/material";
+import { Box, Button, Modal, Typography } from "@mui/material";
 import React, { Fragment, useContext } from "react";
 import { useDispatch } from "react-redux";
 import { deletePost } from "./postSlice";
@@ -27,10 +27,7 @@ const PostDelete = ({ postId, onMenuClosed }) => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  console.log(user);
-
-  const onDelete = (data) => {
-    //TODO: delete post
+  const onDelete = () => {
     dispatch(deletePost({ postId, currentPage: page, userId: user._id }));
     handleClose();
   };
