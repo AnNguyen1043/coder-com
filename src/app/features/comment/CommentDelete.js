@@ -1,9 +1,11 @@
-import { Box, Button, Input, Modal, Typography } from "@mui/material";
-import React, { Fragment, useContext } from "react";
+import { Box, Button, Modal, Typography, IconButton } from "@mui/material";
+import React, { Fragment, useState } from "react";
 import { useDispatch } from "react-redux";
-import { deletePost } from "./postSlice";
-import { PostContext } from "./PostContext";
+import { deleteComment } from "./commentSlice";
+// import { PostContext } from "./PostContext";
 import useAuth from "../../../hooks/useAuth";
+
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const style = {
   position: "absolute",
@@ -19,30 +21,31 @@ const style = {
   pb: 3,
 };
 
-const PostDelete = ({ postId, onMenuClosed }) => {
-  const [open, setOpen] = React.useState(false);
-  const { page } = useContext(PostContext);
+const CommentDelete = ({ comment }) => {
+  const [open, setOpen] = useState(false);
   const { user } = useAuth();
   const dispatch = useDispatch();
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  console.log(user);
-
-  const onDelete = (data) => {
-    //TODO: delete post
-    dispatch(deletePost({ postId, currentPage: page, userId: user._id }));
+  const onDelete = () => {
+    dispatch(deleteComment({ postId: comment.post, commentId: comment._id }));
     handleClose();
   };
 
   const onClose = () => {
     handleClose();
-    onMenuClosed();
   };
+
+  const isYourself = comment.author._id === user._id;
 
   return (
     <Fragment>
-      <Typography onClick={handleOpen}>Delete</Typography>
+      {isYourself && (
+        <IconButton onClick={handleOpen}>
+          <DeleteIcon sx={{ fontSize: 30 }} />
+        </IconButton>
+      )}
       <Modal
         open={open}
         onClose={handleClose}
@@ -51,10 +54,10 @@ const PostDelete = ({ postId, onMenuClosed }) => {
       >
         <Box sx={{ ...style, width: 200 }}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Delete Post
+            Delete Comment
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Are you sure you want to delete this post?
+            Are you sure you want to delete this comment?
           </Typography>
 
           <Button onClick={onClose}>Close</Button>
@@ -65,4 +68,4 @@ const PostDelete = ({ postId, onMenuClosed }) => {
   );
 };
 
-export default PostDelete;
+export default CommentDelete;
